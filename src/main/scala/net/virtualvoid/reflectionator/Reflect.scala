@@ -4,8 +4,13 @@ import scala.reflect._
 import java.lang.reflect
 import reflect.{Method => jMethod}
 
-object Reflect {
+trait Reflect {
   //def method0[U](code: Code[() => U]): reflect.Method
+  def method1[T1, U](code: Code[T1 => U]): reflect.Method
+  def method2[T1, T2, U](code: Code[(T1, T2) => U]): reflect.Method
+}
+
+object Reflect extends Reflect {
   def method1[T1, U](code: Code[T1 => U]): reflect.Method = methodFromTree(code.tree)
   def method2[T1, T2, U](code: Code[(T1, T2) => U]): reflect.Method = methodFromCode(code)
 
