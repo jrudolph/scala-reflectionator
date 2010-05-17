@@ -9,16 +9,21 @@ trait Reflect {
   def method1[T1, U](code: Code[T1 => U]): reflect.Method
   def method2[T1, T2, U](code: Code[(T1, T2) => U]): reflect.Method
 
-  def fieldByGetter[RecvT, T](code: Code[RecvT => T]): reflect.Field
-  def fieldBySetter[RecvT, T](code: Code[(RecvT, T) => Unit]): reflect.Field
+  // get around erasure vs overloading restriction
+  trait FieldAccess[X]
+  implicit def instanceFieldGetter[RecvT, T]: FieldAccess[RecvT => T] = null
+  implicit def instanceFieldSetter[RecvT, T]: FieldAccess[(RecvT, T) => Unit] = null
+  implicit def staticFieldGetter[T]: FieldAccess[() => T] = null
+  implicit def staticFieldSetter[T]: FieldAccess[T => Unit] = null
+
+  def field[X: FieldAccess](code: Code[X]): reflect.Field
 }
 
 object Reflect extends Reflect {
   def method1[T1, U](code: Code[T1 => U]): reflect.Method = methodFromTree(code.tree)
   def method2[T1, T2, U](code: Code[(T1, T2) => U]): reflect.Method = methodFromCode(code)
 
-  def fieldByGetter[RecvT, T](code: Code[RecvT => T]): reflect.Field = fieldFromTree(code.tree)
-  def fieldBySetter[RecvT, T](code: Code[(RecvT, T) => Unit]): reflect.Field = fieldFromTree(code.tree)
+  def field[X: FieldAccess](code: Code[X]): reflect.Field = fieldFromTree(code.tree)
 
   def cleanClass(name:String):java.lang.Class[_] = name match{
     case "int" => Integer.TYPE
