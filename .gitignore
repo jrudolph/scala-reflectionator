@@ -1,2 +1,5 @@
 /project/boot
 /target
+/project/build/target
+*~
+/lib_managed
