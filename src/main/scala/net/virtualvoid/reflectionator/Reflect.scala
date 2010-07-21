@@ -1,7 +1,7 @@
 package net.virtualvoid.reflectionator
 
 import scala.reflect._
-import java.lang.reflect
+import java.lang.{reflect, Class => jClass}
 import reflect.{Method => jMethod}
 
 trait Reflect {
@@ -41,6 +41,7 @@ object Reflect extends Reflect {
     case PrefixedType(_,TypeField(_,tp2:PrefixedType)) => extractClass(tp2)
     case NamedType(name) => name
   }
+  def classFromType(tpe: Type): jClass[_] = cleanClass(extractClass(tpe))
   
   def methodFromCode[T1,T2,U](code:Code[(T1,T2)=>U]) = try { 
     code.tree match{
